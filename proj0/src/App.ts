@@ -8,6 +8,19 @@ const app = express();
 const port = 3333;
 app.use(bodyParser.json);
 
+app.use((request: Request, response: Response, next) => {
+    console.log('Request received for ' + request.url);
+    next();
+});
+
+app.use((request: Request, response: Response, next) => {
+    console.log('Request received for ' + request.url);
+    next();
+});
+
+app.use('/users', userRouter); 
+//app.use('/login', loginRouter);
+//app.use('/reimbursements', reimbursementRouter);
 
 app.listen(port, () => {
     console.log(`App started on port ${port}`);
