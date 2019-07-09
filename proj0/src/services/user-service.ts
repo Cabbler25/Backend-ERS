@@ -1,5 +1,5 @@
-import Role from 'models/Role';
-import User from 'models/User';
+import Role from '../models/Role';
+import User from '../models/User';
 
 const userMap: Map<Number, User> = new Map();
 

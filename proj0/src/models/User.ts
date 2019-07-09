@@ -17,5 +17,5 @@ export default class User {
         this.lastName = lastName;  // not null
         this.email = email; // not null
         this.role = role;  // not null
-    }
+    } 
 }

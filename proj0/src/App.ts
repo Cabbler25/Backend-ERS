@@ -5,8 +5,8 @@ import loginRouter from './routers/login-router';
 import reimbursementRouter from './routers/reimbursement-router';
 
 const app = express();
-const port = 3333;
-app.use(bodyParser.json);
+const port = 3000;
+app.use(bodyParser.json());
 
 app.use((request: Request, response: Response, next) => {
     console.log('Request received for ' + request.url);
