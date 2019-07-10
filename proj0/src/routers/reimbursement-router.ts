@@ -47,7 +47,8 @@ reimbursementRouter.post('', (request: Request, response: Response) => {
     if (!isLoggedIn(response)) return;
 
     let userId = request.cookies.permissions.userId;
-    let query = `INSERT INTO reimbursements (reimbursement_id, author, amount, date_submitted, date_resolved, description, resolver, status, type) VALUES (0, ${userId}, 500, ${Date.now()}, null, 'Test reimbursement', 2, 0, 3)`;
+    let query = `INSERT INTO reimbursements (reimbursement_id, author, amount, date_submitted, date_resolved, description, resolver, status, type) 
+                 VALUES (0, ${userId}, 500, ${Date.now()}, null, 'Test reimbursement', 2, 0, 3)`;
     console.log(query);
     sendQuery(query).then((resolve) => {
         query = `SELECT * FROM reimbursements WHERE reimbursement_id = 0`;
