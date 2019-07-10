@@ -2,37 +2,47 @@ import express, { Request, Response } from 'express';
 import * as userService from '../services/user-service';
 import User from 'models/User';
 
-
 const userRouter = express.Router();
 
-// Returns all users
+// Gets all users
 userRouter.get('', (request: Request, response: Response) => {
-    console.log('Handling get all users');
-    const user: Map<Number, User> = userService.getAllUsers();
-    if (user) {
-        console.log(user);
-        response.json(JSON.stringify([...user]));
+    console.log('User Router: Handling get all users');
+
+    const users: User[] = userService.getAllUsers();
+
+    if (users) {
+        // response.json(users);
     } else {
         response.sendStatus(404);
     }
 });
 
-
 // Gets specific user by ID
 userRouter.get('/:id', (request: Request, response: Response) => {
-    console.log('Handling get user by ID');
+    console.log('User Router: Handling get user by ID');
+
     const id = parseInt(request.params.id);
     const user: User = userService.getUserById(id);
+
     if (user) {
-        console.log(user);
         response.json(user);
     } else {
         response.sendStatus(404);
     }
 });
 
-/*function jsonToMap(jsonStr) {
-    return new Map(JSON.parse(jsonStr));
-}*/
+// Update user
+userRouter.patch('', (request: Request, response: Response) => {
+    console.log('User Router: Handling user update');
+
+    let body = request.body[0];
+    const updatedUser: User = userService.updateUser(body);
+
+    if (updatedUser) {
+        response.json(updatedUser);
+    } else {
+        response.sendStatus(404);
+    }
+});
 
 export default userRouter;

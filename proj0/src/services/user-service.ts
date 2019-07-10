@@ -1,20 +1,51 @@
-import Role from '../models/Role';
 import User from '../models/User';
+import * as queries from '../Queries';
 
-const userMap: Map<Number, User> = new Map();
+const users: Array<User> = new Array;
 
-let userCount = 1;
-let adminUser: User = new User(0, 'DAdams', 'password', 'Dylan', 'Adams', 'dadams10642@outlook.com', new Role(0, 'admin'))
-let financeManagerUser: User = new User(1, 'DKoenig', 'moneymoney', 'Dylan', 'Koenig', 'bigDK@gmail.com', new Role(1, 'finance-manager'))
-let firstEmployee: User = new User(2, 'BAdams', 'perfume', 'Becca', 'Adams', 'becca.boo@aol.com', new Role(2, 'employee'))
-userMap.set(userCount++, adminUser);
-userMap.set(userCount++, financeManagerUser);
-userMap.set(userCount++, firstEmployee);
-
-export function getUserById (id): User {
-    return userMap.get(id);
+export function initializeUsers() {
+    console.log('Initializing users');
+    console.log(getAllUsers());
+    // console.log(queries.sendQuery('SELECT * FROM users'));
 }
 
-export function getAllUsers(): Map<Number, User> {
-    return userMap;
+export function loginUser(body: any): User {
+    let username = body.username;
+    let password = body.password;
+
+    return users.find((v) => {
+        return v.username == username && v.password == password;
+    });
+}
+
+export function getUserById(id): User {
+    return users.find((v) => {
+        return v.userId == id;
+    });
+}
+
+export function getAllUsers(): User[]{
+    /*let query = {
+        text: 'INSERT INTO users (username, password, first_name, last_name, email, role) VALUES ($1,$2,$3,$4,$5,$6)',
+        values: ['employee', 'password', 'Bobby', 'test', 'testing@aol.com', 'employee'],
+    };*/
+    //queries.sendQuery('SELECT * FROM users');
+    return queries.sendQuery('SELECT * FROM users');
+}
+
+export function updateUser(body): User {
+    let id = body.userId;
+    let idx = users.findIndex((v) => {
+        return v.userId == id;
+    });
+    if (!idx) return;
+
+    const usr: User = users[idx];
+
+    for (let a in body) {
+        usr[a] = body[a];
+    }
+
+    users[idx] = usr;
+    return usr;
 }
