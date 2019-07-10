@@ -1,7 +1,14 @@
+export const permissions = {
+    ADMIN: 'admin',
+    FINANCE_MANAGER: 'finance-manager',
+    EMPLOYEE: 'employee'
+}
+
 export default class Role {
     roleId: number; // primary key
-    role: string; // not null, unique    
-    constructor(roleId: number, role: string) {
+    role: Enumerator; // not null, unique    
+    
+    constructor(roleId: number, role: Enumerator) {
         this.roleId = roleId;
         this.role = role;
     }

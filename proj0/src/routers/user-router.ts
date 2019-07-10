@@ -1,72 +1,76 @@
 import express, { Request, Response } from 'express';
-import * as userService from '../services/user-service';
-import * as queries from '../Queries';
-import User from 'models/User';
+import { permissions } from '../models/Role';
+import { isLoggedIn, hasPermission, sendQuery } from '../services/Services';
 
 const userRouter = express.Router();
 
 // Gets all users
 userRouter.get('', (request: Request, response: Response) => {
-    console.log('User Router: Handling get all users');
-    
-    queries.sendQuery('SELECT * FROM users').then((resolve) => {
+    console.log('\nUser Router: Handling get all users');
+
+    if (!isLoggedIn(response)) return;
+    if (!hasPermission(request, response, permissions.FINANCE_MANAGER)) return;
+
+    let query = 'SELECT * FROM users';
+    console.log(query);
+    sendQuery(query).then((resolve) => {
         response.json(resolve.rows);
-    }, (error) => {
+    }, (error) => { 
+        console.log(error);
         response.sendStatus(404);
     });
 });
 
 // Gets specific user by ID
 userRouter.get('/:id', (request: Request, response: Response) => {
-    console.log('User Router: Handling get user by ID');
+    console.log('\nUser Router: Handling get user by ID');
     const id = parseInt(request.params.id);
-    
-    queries.sendQuery('SELECT * FROM users WHERE user_id = ' + id).then((resolve) => {
+
+    if (!isLoggedIn(response)) return;
+    if (!hasPermission(request, response, permissions.FINANCE_MANAGER, id)) return;
+
+    let query = `SELECT * FROM users WHERE user_id = ${id}`;
+    console.log(query);
+    sendQuery(query).then((resolve) => {
         response.json(resolve.rows);
     }, (error) => {
-        console.log('Get user err', error);
+        console.log('Get user err: ', error);
         response.sendStatus(404);
     });
 });
 
 // Update user
 userRouter.patch('', (request: Request, response: Response) => {
-    console.log('User Router: Handling user update');
+    console.log('\nUser Router: Handling user update');
+
+    if (!isLoggedIn(response)) return;
+    if (!hasPermission(request, response, permissions.ADMIN)) return;
 
     let body = request.body[0];
-    let id = body.userId;
-    let properties: string;
-    for (let a in body) {
+    let id: number = body.user_id;
+    delete body.user_id;
 
-        properties += `${a} = ${body[a]}`;
+    // Format body
+    let properties: string = '';
+    for (let a in body) {
+        if (!body[a]) continue;
+        properties += `${a} = '${body[a]}', `;
+    }
+    if (properties.length > 0) {
+        properties = properties.substr(0, properties.length - 2);
     }
 
-    queries.sendQuery('UPDATE users WHERE user_id = ' + id + ' FOR ' + properties).then((resolve) => {
-        response.json(resolve.rows);
+    let query = `UPDATE users SET ${properties} WHERE user_id = ${id}`;
+    console.log(query);
+    sendQuery(query).then((resolve) => {
+        query = `SELECT * FROM users WHERE user_id = ${id}`;
+        sendQuery(query).then((resolve) => {
+            response.json(resolve.rows);
+        });
     }, (error) => {
         console.log('Get user err', error);
         response.sendStatus(404);
     });
-
-    if (updatedUser) {
-        response.json(updatedUser);
-    } else {
-        response.sendStatus(404);
-    }
-
-    let idx = users.findIndex((v) => {
-        return v.userId == id;
-    });
-    if (!idx) return;
-
-    const usr: User = users[idx];
-
-    for (let a in body) {
-        usr[a] = body[a];
-    }
-
-    users[idx] = usr;
-    return usr;
 });
 
 export default userRouter;
