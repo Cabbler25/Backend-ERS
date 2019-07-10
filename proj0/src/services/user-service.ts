@@ -1,11 +1,14 @@
 import User from '../models/User';
 import * as queries from '../Queries';
 
-const users: Array<User> = new Array;
+let users: Array<User>;
 
 export function initializeUsers() {
     console.log('Initializing users');
-    console.log(getAllUsers());
+    queries.sendQuery('SELECT * FROM users').then((v) => {
+        users = v.rows;
+        console.log(users);
+    });
     // console.log(queries.sendQuery('SELECT * FROM users'));
 }
 
@@ -25,11 +28,6 @@ export function getUserById(id): User {
 }
 
 export function getAllUsers(): User[]{
-    /*let query = {
-        text: 'INSERT INTO users (username, password, first_name, last_name, email, role) VALUES ($1,$2,$3,$4,$5,$6)',
-        values: ['employee', 'password', 'Bobby', 'test', 'testing@aol.com', 'employee'],
-    };*/
-    //queries.sendQuery('SELECT * FROM users');
     return queries.sendQuery('SELECT * FROM users');
 }
 
