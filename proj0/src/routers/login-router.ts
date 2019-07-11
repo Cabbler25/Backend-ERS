@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
-import { setUserStatus, sendQuery } from '../services/Services';
+import { sendQuery } from '../services/Services';
 
+// 5 minute timoeout
+const timeout: number = 1000 * 60 * 5;
 const loginRouter = express.Router();
 
 loginRouter.post('', (request: Request, response: Response) => {
@@ -15,19 +17,16 @@ loginRouter.post('', (request: Request, response: Response) => {
     console.log(query);
     sendQuery(query).then((resolve) => {
         if (resolve.rows.length == 0) throw err;
-
-        for (let a in response.cookie) {
-            response.clearCookie(a);
-        }
  
         const usr = resolve.rows[0];
         // Lookup users role
         query = `SELECT * FROM roles WHERE role_id = ${usr.role}`;
         sendQuery(query).then((res) => {
             const usrRole = res.rows[0];
-            console.log("Login successful.");
-            setUserStatus(true);
-            response.cookie('permissions', { roleId: usrRole.role_id, role: usrRole.role, userId: usr.user_id }).json(resolve.rows);
+            console.log(`Login successful (${usrRole.role}).`);
+            response.cookie('user', { userId: usr.user_id}, { maxAge: timeout, httpOnly: true });
+            response.cookie('permissions', { roleId: usrRole.role_id, role: usrRole.role}, { maxAge: timeout, httpOnly: true });
+            response.json(resolve.rows);
         });
     }).catch((error) => {
         console.log(error);

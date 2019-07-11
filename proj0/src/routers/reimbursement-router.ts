@@ -9,10 +9,10 @@ reimbursementRouter.get('/status/:statusId', (request: Request, response: Respon
     console.log('\nReimbursement Router: Handling get reimbursement by status ID');
     const id = parseInt(request.params.statusId);
 
-    if (!isLoggedIn(response)) return;
+    if (!isLoggedIn(request, response)) return;
     if (!hasPermission(request, response, permissions.FINANCE_MANAGER)) return;
     
-    let query = `SELECT * FROM reimbursements WHERE status = ${id}`;
+    let query = `SELECT * FROM reimbursements WHERE status = ${id} ORDER BY date_submitted ASC`;
     console.log(query);
     sendQuery(query).then((resolve) => {
         response.json(resolve.rows);
@@ -27,10 +27,10 @@ reimbursementRouter.get('/author/userId/:userId', (request: Request, response: R
     console.log('\nReimbursement Router: Handling get reimbursement by user ID');
     const id = parseInt(request.params.userId);
 
-    if (!isLoggedIn(response)) return;
+    if (!isLoggedIn(request, response)) return;
     if (!hasPermission(request, response, permissions.FINANCE_MANAGER, id)) return;
 
-    let query = `SELECT * FROM reimbursements WHERE author = ${id}`;
+    let query = `SELECT * FROM reimbursements WHERE author = ${id} ORDER BY date_submitted ASC`;
     console.log(query);
     sendQuery(query).then((resolve) => {
         response.json(resolve.rows);
@@ -44,7 +44,7 @@ reimbursementRouter.get('/author/userId/:userId', (request: Request, response: R
 reimbursementRouter.post('', (request: Request, response: Response) => {
     console.log('\nReimbursement Router: Handling reimbursement submit');
 
-    if (!isLoggedIn(response)) return;
+    if (!isLoggedIn(request, response)) return;
 
     let userId = request.cookies.permissions.userId;
     let query = `INSERT INTO reimbursements (reimbursement_id, author, amount, date_submitted, date_resolved, description, resolver, status, type) 
@@ -65,7 +65,7 @@ reimbursementRouter.post('', (request: Request, response: Response) => {
 reimbursementRouter.patch('', (request: Request, response: Response) => {
     console.log('\nReimbursement Router: Handling reimbursement update');
 
-    if (!isLoggedIn(response)) return;
+    if (!isLoggedIn(request, response)) return;
     if (!hasPermission(request, response, permissions.FINANCE_MANAGER)) return;
 
     let body = request.body[0];

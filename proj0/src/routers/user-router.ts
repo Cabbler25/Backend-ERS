@@ -8,7 +8,7 @@ const userRouter = express.Router();
 userRouter.get('', (request: Request, response: Response) => {
     console.log('\nUser Router: Handling get all users');
 
-    if (!isLoggedIn(response)) return;
+    if (!isLoggedIn(request, response)) return;
     if (!hasPermission(request, response, permissions.FINANCE_MANAGER)) return;
 
     let query = 'SELECT * FROM users';
@@ -26,7 +26,7 @@ userRouter.get('/:id', (request: Request, response: Response) => {
     console.log('\nUser Router: Handling get user by ID');
     const id = parseInt(request.params.id);
 
-    if (!isLoggedIn(response)) return;
+    if (!isLoggedIn(request, response)) return;
     if (!hasPermission(request, response, permissions.FINANCE_MANAGER, id)) return;
 
     let query = `SELECT * FROM users WHERE user_id = ${id}`;
@@ -43,7 +43,7 @@ userRouter.get('/:id', (request: Request, response: Response) => {
 userRouter.patch('', (request: Request, response: Response) => {
     console.log('\nUser Router: Handling user update');
 
-    if (!isLoggedIn(response)) return;
+    if (!isLoggedIn(request, response)) return;
     if (!hasPermission(request, response, permissions.ADMIN)) return;
 
     let body = request.body[0];
