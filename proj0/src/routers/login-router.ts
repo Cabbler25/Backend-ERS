@@ -8,7 +8,6 @@ const loginRouter = express.Router();
 loginRouter.post('', (request: Request, response: Response) => {
     console.log('\nLogin Router: Handling user sign in');
 
-
     const err = { message: "Invalid Credentials" };
     const body = request.body[0];
     const userIn = { username: body.username, password: body.password };
@@ -22,11 +21,11 @@ loginRouter.post('', (request: Request, response: Response) => {
         // Lookup users role
         query = `SELECT * FROM roles WHERE role_id = ${usr.role}`;
         sendQuery(query).then((res) => {
-            const usrRole = res.rows[0];
-            console.log(`Login successful (${usrRole.role}).`);
+            const roleType = res.rows[0];
+            console.log(`Login successful (${roleType.role}).`);
             response.cookie('user', { userId: usr.user_id}, { maxAge: timeout, httpOnly: true });
-            response.cookie('permissions', { roleId: usrRole.role_id, role: usrRole.role}, { maxAge: timeout, httpOnly: true });
-            response.json(resolve.rows);
+            response.cookie('permissions', { roleId: roleType.role_id, role: roleType.role}, { maxAge: timeout, httpOnly: true });
+            response.status(200).json(resolve.rows);
         });
     }).catch((error) => {
         console.log(error);

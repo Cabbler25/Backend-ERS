@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
-import { permissions } from '../models/Role';
-import { isLoggedIn, hasPermission, sendQuery } from '../services/Services';
+import { roles } from '../models/Roles';
+import { hasPermission, sendQuery } from '../services/Services';
 
 const userRouter = express.Router();
 
@@ -8,14 +8,13 @@ const userRouter = express.Router();
 userRouter.get('', (request: Request, response: Response) => {
     console.log('\nUser Router: Handling get all users');
 
-    if (!isLoggedIn(request, response)) return;
-    if (!hasPermission(request, response, permissions.FINANCE_MANAGER)) return;
+    if (!hasPermission(request, response, roles.FINANCE_MANAGER)) return;
 
     let query = 'SELECT * FROM users';
     console.log(query);
     sendQuery(query).then((resolve) => {
         response.json(resolve.rows);
-    }, (error) => { 
+    }, (error) => {
         console.log(error);
         response.sendStatus(404);
     });
@@ -26,8 +25,7 @@ userRouter.get('/:id', (request: Request, response: Response) => {
     console.log('\nUser Router: Handling get user by ID');
     const id = parseInt(request.params.id);
 
-    if (!isLoggedIn(request, response)) return;
-    if (!hasPermission(request, response, permissions.FINANCE_MANAGER, id)) return;
+    if (!hasPermission(request, response, roles.FINANCE_MANAGER, id)) return;
 
     let query = `SELECT * FROM users WHERE user_id = ${id}`;
     console.log(query);
@@ -43,8 +41,7 @@ userRouter.get('/:id', (request: Request, response: Response) => {
 userRouter.patch('', (request: Request, response: Response) => {
     console.log('\nUser Router: Handling user update');
 
-    if (!isLoggedIn(request, response)) return;
-    if (!hasPermission(request, response, permissions.ADMIN)) return;
+    if (!hasPermission(request, response, roles.ADMIN)) return;
 
     let body = request.body[0];
     let id: number = body.user_id;
@@ -53,12 +50,9 @@ userRouter.patch('', (request: Request, response: Response) => {
     // Format body
     let properties: string = '';
     for (let a in body) {
-        if (!body[a]) continue;
-        properties += `${a} = '${body[a]}', `;
+        properties += `${a} = ${typeof body[a] === 'number' ? `${body[a]}` : `'${body[a]}'`}, `;
     }
-    if (properties.length > 0) {
-        properties = properties.substr(0, properties.length - 2);
-    }
+    properties = properties.substr(0, properties.lastIndexOf(','));
 
     let query = `UPDATE users SET ${properties} WHERE user_id = ${id}`;
     console.log(query);
