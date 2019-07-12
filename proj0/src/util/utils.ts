@@ -10,7 +10,8 @@ export function hasPermission(request, response, requiredRole, requiredId?): boo
     const userId = request.cookies.user.id;
     const role = request.cookies.permissions.role;
 
-    let result = requiredRole == roles.ALL || (requiredId ? role == requiredRole || userId == requiredId : role == requiredRole);
+    let result = requiredRole == roles.ALL || 
+                 (requiredId ? role == requiredRole || userId == requiredId : role == requiredRole);
     if (result) {
         return true;
     } else {
