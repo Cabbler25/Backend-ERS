@@ -1,39 +1,28 @@
 import express, { Request, Response } from 'express';
-import { sendQuery } from '../services/Services';
+import * as loginService from '../services/login-service';
+import User from '../models/User';
+import Role from '../models/Role';
 
 // 5 minute timoeout
 const timeout: number = 1000 * 60 * 5;
-const loginRouter = express.Router();
+const loginRouter = express.Router();   
 
-loginRouter.post('', (request: Request, response: Response) => {
+loginRouter.post('', async (request: Request, response: Response) => {
     console.log('\nLogin Router: Handling user sign in');
+    let username = request.body[0].username;
+    let password = request.body[0].password;
 
-    const err = { message: "Invalid Credentials" };
-    const body = request.body[0];
-    const userIn = { username: body.username, password: body.password };
-
-    let query = `SELECT * FROM users WHERE username = '${userIn.username}' AND password = '${userIn.password}'`;
-    console.log(query);
-    sendQuery(query).then((resolve) => {
-        if (resolve.rows.length == 0) throw err;
- 
-        const usr = resolve.rows[0];
-        // Lookup users role
-        query = `SELECT * FROM roles WHERE role_id = ${usr.role}`;
-        sendQuery(query).then((res) => {
-            const roleType = res.rows[0];
-            console.log(`Login successful (${roleType.role}).`);
-            response.cookie('user', { userId: usr.user_id}, { maxAge: timeout, httpOnly: true });
-            response.cookie('permissions', { roleId: roleType.role_id, role: roleType.role}, { maxAge: timeout, httpOnly: true });
-            response.status(200).json(resolve.rows);
-        });
-    }).catch((error) => {
-        console.log(error);
-        response.status(400).json(err);
-    }), (error) => {
-        console.log(error);
-        response.status(400).json(err);
+    const user: User = await loginService.logIn(username, password);
+    if (user.id) {
+        const role: Role = await loginService.getRole(user.id);
+        response.cookie('user', {id: user.id}, { maxAge: timeout, httpOnly: true });
+        response.cookie('permissions', {id: role.id, role: role.role}, { maxAge: timeout, httpOnly: true });
+        response.status(200).json(user); 
+        // response.cookie('permissions', { roleId: roleType.role_id, role: roleType.role}, { maxAge: timeout, httpOnly: true });
+    } else {
+        response.status(400).json('Invalid Credentials');
     }
 });
 
 export default loginRouter;
+ 
