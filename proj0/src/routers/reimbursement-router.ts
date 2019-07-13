@@ -39,13 +39,14 @@ reimbursementRouter.patch('', async (request: Request, response: Response) => {
     console.log('\nReimbursement Router: Handling reimbursement patch...');
     if (!hasPermission(request, response, roles.FINANCE_MANAGER)) return;
 
+    let err: string = 'Reimbursement not found';
     try {
         const rmbmnt: Reimbursement = new Reimbursement(request.body[0]);
-        if (!rmbmnt) throw 'Reimbursement not valid';
+        if (!rmbmnt) throw err;
 
         const patchedRmbmnt: Reimbursement = await reimbursementService.updateReimbursement(rmbmnt);
-        patchedRmbmnt.id ? response.status(201).json(patchedRmbmnt) : response.sendStatus(400);
-    } catch (e) {
+        patchedRmbmnt ? response.status(201).json(patchedRmbmnt) : response.sendStatus(404);
+    } catch (err) {
         response.sendStatus(400);
     }
 });
@@ -55,13 +56,14 @@ reimbursementRouter.post('', async (request: Request, response: Response) => {
     console.log('\nReimbursement Router: Handling reimbursement submit...');
     if (!hasPermission(request, response, roles.ALL)) return;
 
+    let err: string = 'Reimbursement not valid';
     try {
         const rmbmnt: Reimbursement = new Reimbursement(request.body[0]);
-        if (!rmbmnt) throw 'Reimbursement not valid';
+        if (!rmbmnt) throw err;
         
         const completedRmbmnt: Reimbursement = await reimbursementService.submitReimbursement(rmbmnt, request.cookies.user.id);
-        completedRmbmnt.id ? response.status(200).json(completedRmbmnt) : response.sendStatus(400);
-    } catch (e) {
+        completedRmbmnt ? response.status(200).json(completedRmbmnt) : response.sendStatus(400);
+    } catch (err) {
         response.sendStatus(400);
     }
 });

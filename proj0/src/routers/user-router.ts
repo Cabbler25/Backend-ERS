@@ -26,7 +26,7 @@ userRouter.get('/:id', async (request: Request, response: Response) => {
     if (!hasPermission(request, response, roles.FINANCE_MANAGER, id)) return;
 
     const user: User = await userService.getUserById(id);
-    user.id ? response.status(200).json(user) : response.sendStatus(404);
+    user ? response.status(200).json(user) : response.sendStatus(404);
 });
 
 // Update user
@@ -34,14 +34,15 @@ userRouter.patch('', async (request: Request, response: Response) => {
     console.log('\nUser Router: Handling user patch...');
     if (!hasPermission(request, response, roles.ADMIN)) return;
 
+    let err: string = 'User not found';
     try {
         const user: User = new User(request.body[0]);
-        if (!user) throw 'User not found';
+        if (!user) throw err;
 
         const patchedUser: User = await userService.updateUser(user);
-        patchedUser.id ? response.status(200).json(patchedUser) : response.sendStatus(404);
-    } catch (e) {
-        response.sendStatus(404);
+        patchedUser ? response.status(200).json(patchedUser) : response.sendStatus(404);
+    } catch (err) {
+        response.sendStatus(400);
     }
 });
 

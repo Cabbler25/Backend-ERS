@@ -28,14 +28,11 @@ export async function updateUser(user: User): Promise<User> {
 
     // Gather all properties and values 
     // into a SQL query. Fun
+    const values: any[] = [];
     let columns: string = '';
-    let values: any[] = [];
     let count: number = 1;
     for (let a in user) {
-        if (user[a] === undefined || user[a] === null) {
-            delete user[a];
-            continue;
-        }
+        if (user[a] === undefined || user[a] === null) continue;
         switch (a) {
             case 'firstName':
                 columns += `first_name = $${count++}, `;
@@ -48,11 +45,11 @@ export async function updateUser(user: User): Promise<User> {
         }
         values.push(user[a]);
     }
-    columns = columns.substr(0, columns.lastIndexOf(','));
+    columns = columns.slice(0, -2);
     values.push(id);
 
     let query = `UPDATE users SET ${columns} WHERE id = $${count} RETURNING ${User.getColumns()}`;
-    console.log(query + '\n' + values);
+    console.log(`${query}\nValues: [ ${values} ]`);
     
     const result = await db.query(query, values);
     return result.rows[0];

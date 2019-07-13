@@ -11,7 +11,7 @@ export async function logIn(credentials): Promise<User> {
 }
 
 export async function getRole(id): Promise<Role> {
-    console.log(`Retrieving user's role...`);
+    console.log(`Retrieving user role...`);
     let query = `SELECT ${Role.getColumns()} FROM roles WHERE id = $1`;
     console.log(`${query}\nValues: [ ${id} ]`);
 

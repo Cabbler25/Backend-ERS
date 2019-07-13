@@ -29,38 +29,29 @@ export async function getReimbursementByUser(id: number): Promise<Reimbursement[
 }
 
 // Patch reimbursement
-export async function updateReimbursement(rmbmnt): Promise<Reimbursement> {
+export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbursement> {
     let id: number = rmbmnt.id;
 
     // Remove properties that may never be updated
     delete rmbmnt.id;
+    delete rmbmnt.dateSubmitted;
     delete rmbmnt.dateResolved;
+    // delete rmbmnt.resolver; not sure if resolver to be set programmatically
+    // delete rmbmnt.author; this too
 
     // Gather all properties and values 
     // into a SQL query. Fun
+    const values: any[] = [];
     let columns: string = '';
-    let values: any[] = [];
     let count: number = 1;
     for (let a in rmbmnt) {
         // Exclude undefined/null properties
-        if (rmbmnt[a] === undefined || rmbmnt[a] === null) {
-            delete rmbmnt.a;
-            continue;
-        }
-        // Convert class var names -> db column names
-        switch (a) {
-            case 'dateSubmitted':
-                columns += `date_submitted = $${count++}, `;
-                break;
-            case 'dateResolved':
-                columns += `date_resolved = $${count++}, `;
-                break;
-            default:
-                columns += `${a} = $${count++}, `;
-        }
+        if (rmbmnt[a] === undefined || rmbmnt[a] === null) continue;
+
+        columns += `${a} = $${count++}, `;
         values.push(rmbmnt[a]);
     }
-    columns = columns.substr(0, columns.lastIndexOf(','));
+    columns = columns.slice(0, -2);
     values.push(id);
 
     let query = `UPDATE reimbursements SET ${columns} WHERE id = $${count} RETURNING ${Reimbursement.getColumns()}`;
@@ -71,7 +62,7 @@ export async function updateReimbursement(rmbmnt): Promise<Reimbursement> {
 }
 
 // Submit reimbursement
-export async function submitReimbursement(rmbmnt, id): Promise<Reimbursement> {
+export async function submitReimbursement(rmbmnt: Reimbursement, id: number): Promise<Reimbursement> {
     // Remove properties that are auto-generated
     delete rmbmnt.id; delete rmbmnt.author; delete rmbmnt.dateSubmitted;
     delete rmbmnt.dateResolved;
@@ -80,34 +71,25 @@ export async function submitReimbursement(rmbmnt, id): Promise<Reimbursement> {
 
     // Gather all properties and values 
     // into a SQL query. Fun
+    const values: any[] = [];
     let columns: string = '';
     let placeHolders: string = '';
-    let values: any[] = [];
     let count: number = 1;
     for (let a in rmbmnt) {
         if (rmbmnt[a] === undefined || rmbmnt[a] === null) {
             // Handle columns that can be null
-            if (a == 'resolver') {
-                delete rmbmnt.a;
-                continue;
-            } else return new Reimbursement({}); // lacks required properties
+            if (a == 'resolver') continue;
+            console.log(`Missing field: ${a}`);
+            return; // otherwise lacks required properties
         }
-        // Convert class var names -> db column names
-        switch (a) {
-            case 'dateSubmitted':
-                columns += `date_submitted, `;
-                break;
-            case 'dateResolved':
-                columns += `date_resolved, `;
-                break;
-            default:
-                columns += `${a}, `;
-        }
+        // Convert var names to db column names
+        a == 'dateSubmitted' ? columns += `date_submitted, ` : columns += `${a}, `;
+
         placeHolders += `$${count++}, `;
         values.push(rmbmnt[a]);
     }
-    columns = columns.substr(0, columns.lastIndexOf(','));
-    placeHolders = placeHolders.substr(0, placeHolders.lastIndexOf(','));
+    columns = columns.slice(0, -2);
+    placeHolders = placeHolders.slice(0, -2);
 
     // Jesus that took a while
     let query = `INSERT INTO reimbursements (${columns}) VALUES (${placeHolders}) RETURNING ${Reimbursement.getColumns()}`;
