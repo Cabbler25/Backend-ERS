@@ -8,11 +8,11 @@ const timeout: number = 1000 * 60 * 5;
 const loginRouter = express.Router();   
 
 loginRouter.post('', async (request: Request, response: Response) => {
-    console.log('\nLogin Router: Handling user sign in');
+    console.log('\nLogin Router: Handling user sign in...');
     let username = request.body[0].username;
     let password = request.body[0].password;
 
-    const user: User = await loginService.logIn(username, password);
+    const user: User = await loginService.logIn([username, password]);
     if (user.id) {
         const role: Role = await loginService.getRole(user.id);
         response.cookie('user', {id: user.id}, { maxAge: timeout, httpOnly: true });

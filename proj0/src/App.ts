@@ -10,7 +10,7 @@ var types = require('pg').types
 types.setTypeParser(1700, function(val) {
     return parseFloat(val);
 });
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 const port = 3333;
 app.use(cookieParser());

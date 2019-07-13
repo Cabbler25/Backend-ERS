@@ -1,10 +1,9 @@
 import User from "../models/User";
 import db from "../util/pg-connection";
 
-export async function createUser(user: User): Promise<User> {
-    // Not implemented
-    return new User({});
-}
+// TODO: implement
+// For now the users are pre-existing, one for each unique role
+export async function createUser(user: User): Promise<User> { return user; }
 
 export async function getAllUsers(): Promise<User[]> {
     let query = `SELECT ${User.getColumns()} FROM users`;
@@ -14,18 +13,21 @@ export async function getAllUsers(): Promise<User[]> {
     return result.rows;
 }
 
-export async function getUserById(id): Promise<User> {
+export async function getUserById(id: number): Promise<User> {
     let query = `SELECT ${User.getColumns()} FROM users WHERE id = $1`;
-    console.log(query + "\n" + id);
+    console.log(`${query}\nValues: [ ${id} ]`);
     
     const result = await db.query(query, [id]);
     return result.rows[0];
 }
 
+// Update user
 export async function updateUser(user: User): Promise<User> {
     let id: number = user.id;
     delete user.id;
 
+    // Gather all properties and values 
+    // into a SQL query. Fun
     let columns: string = '';
     let values: any[] = [];
     let count: number = 1;
@@ -49,13 +51,10 @@ export async function updateUser(user: User): Promise<User> {
     columns = columns.substr(0, columns.lastIndexOf(','));
     values.push(id);
 
-    const query = {
-        text: `UPDATE users SET ${columns} WHERE id = $${count} RETURNING ${User.getColumns()}`,
-        values: values,
-    }
-
-    console.log(query.text + '\n' + query.values);
-    const result = await db.query(query);
+    let query = `UPDATE users SET ${columns} WHERE id = $${count} RETURNING ${User.getColumns()}`;
+    console.log(query + '\n' + values);
+    
+    const result = await db.query(query, values);
     return result.rows[0];
 }
 
