@@ -60,7 +60,7 @@ reimbursementRouter.post('', async (request: Request, response: Response) => {
     try {
         const rmbmnt: Reimbursement = new Reimbursement(request.body[0]);
         if (!rmbmnt) throw err;
-        
+
         const completedRmbmnt: Reimbursement = await reimbursementService.submitReimbursement(rmbmnt, request.cookies.user.id);
         completedRmbmnt ? response.status(200).json(completedRmbmnt) : response.sendStatus(400);
     } catch (err) {

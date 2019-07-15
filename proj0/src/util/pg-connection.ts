@@ -16,4 +16,4 @@ process.on('SIGINT', () => {
     process.exit();
 });
 
-export default db;
+export default db; 

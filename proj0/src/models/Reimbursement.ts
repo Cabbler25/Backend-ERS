@@ -9,6 +9,7 @@ export default class Reimbursement {
     status: number;
     type: number;
     constructor(obj) {
+        if (!obj) return;
         this.id = obj.id;
         this.author = obj.author;
         this.amount = obj.amount;

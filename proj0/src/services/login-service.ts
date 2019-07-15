@@ -2,11 +2,11 @@ import db from "../util/pg-connection";
 import User from "../models/User";
 import Role from "../models/Role";
 
-export async function logIn(credentials): Promise<User> {
-    let query =`SELECT ${User.getColumns()} FROM users WHERE username = $1 AND password = $2`;
-    console.log(`${query}\nValues: [ ${credentials} ]`);
+export async function logIn(username: string): Promise<User> {
+    let query = `SELECT ${User.getColumns()} FROM users WHERE username = $1`;
+    console.log(`${query}\nValues: [ ${username} ]`);
 
-    const result = await db.query(query, credentials);
+    const result = await db.query(query, [username]);
     return result.rows[0];
 }
 

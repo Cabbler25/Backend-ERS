@@ -1,5 +1,3 @@
-import Role from '../models/Role';
-
 export default class User {
     id: number;
     username: string;
@@ -10,10 +8,7 @@ export default class User {
     role: number;
     
     constructor(obj) {
-        if (!obj) {
-            return;
-        }
-
+        if (!obj) return;
         this.id = obj.id;
         this.username = obj.username;
         this.password = obj.password;

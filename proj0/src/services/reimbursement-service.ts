@@ -78,9 +78,10 @@ export async function submitReimbursement(rmbmnt: Reimbursement, id: number): Pr
     for (let a in rmbmnt) {
         if (rmbmnt[a] === undefined || rmbmnt[a] === null) {
             // Handle columns that can be null
+            // Only one so far is resolver
             if (a == 'resolver') continue;
             console.log(`Missing field: ${a}`);
-            return; // otherwise lacks required properties
+            return; // otherwise invalid, lacks required properties
         }
         // Convert var names to db column names
         a == 'dateSubmitted' ? columns += `date_submitted, ` : columns += `${a}, `;

@@ -1,12 +1,15 @@
 import User from "../models/User";
 import db from "../util/pg-connection";
 
+const bcrypt = require('bcrypt');
+const saltRounds: number = 12;
+
 // TODO: implement
 // For now the users are pre-existing, one for each unique role
 export async function createUser(user: User): Promise<User> { return user; }
 
 export async function getAllUsers(): Promise<User[]> {
-    let query = `SELECT ${User.getColumns()} FROM users`;
+    let query = `SELECT ${User.getColumns()} FROM users ORDER BY id`;
     console.log(query);
 
     const result = await db.query(query);
@@ -16,7 +19,7 @@ export async function getAllUsers(): Promise<User[]> {
 export async function getUserById(id: number): Promise<User> {
     let query = `SELECT ${User.getColumns()} FROM users WHERE id = $1`;
     console.log(`${query}\nValues: [ ${id} ]`);
-    
+
     const result = await db.query(query, [id]);
     return result.rows[0];
 }
@@ -40,6 +43,10 @@ export async function updateUser(user: User): Promise<User> {
             case 'lastName':
                 columns += `last_name = $${count++}, `;
                 break;
+            case 'password':
+                columns += `${a} = $${count++}, `;
+                user[a] = await bcrypt.hash(user[a], saltRounds);
+                break;
             default:
                 columns += `${a} = $${count++}, `;
         }
@@ -50,7 +57,7 @@ export async function updateUser(user: User): Promise<User> {
 
     let query = `UPDATE users SET ${columns} WHERE id = $${count} RETURNING ${User.getColumns()}`;
     console.log(`${query}\nValues: [ ${values} ]`);
-    
+
     const result = await db.query(query, values);
     return result.rows[0];
 }

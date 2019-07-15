@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import bodyParser from 'body-parser';
 import userRouter from './routers/user-router';
 import loginRouter from './routers/login-router';
@@ -10,6 +10,7 @@ var types = require('pg').types
 types.setTypeParser(1700, function(val) {
     return parseFloat(val);
 });
+
 const cookieParser = require('cookie-parser');
 const app = express();
 const port = 3333;
@@ -20,7 +21,7 @@ app.use('/users', userRouter);
 app.use('/login', loginRouter);
 app.use('/reimbursements', reimbursementRouter);
 
-app.listen(port, () => {
+app.listen(port, () => { 
   console.log(`App started on port ${port}`);
 });
 
