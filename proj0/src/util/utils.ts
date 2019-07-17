@@ -1,24 +1,29 @@
 import { roles } from "../models/Role";
 
-export function hasPermission(request, response, roleRequired, idRequired?): boolean {
-    if (!request.cookies.user) {
+export function hasPermission(req, res, requiredRole, requiredId?): boolean {
+    if (!req.cookies.user) {
         console.log('Login required.');
-        response.status(401).send({ message: 'User not logged in!' });
+        res.status(401).send({ message: 'User not logged in!' });
         return false;
     }
-    if (roleRequired == roles.ALL) return true;
+    if (requiredRole == roles.ALL) return true;
 
-    const userId = request.cookies.user.id;
-    const userRole = request.cookies.permissions.role;
+    const userId = req.cookies.user.id;
+    const userRole = req.cookies.permissions.role;
 
-    let result: boolean;
-    if (idRequired) result = userId == idRequired;
-    if (!result) result = userRole == roleRequired;
-
+    let result = userId == requiredId || userRole == requiredRole;
     if (!result) {
         console.log('Bad permissions.');
-        response.status(401).send({ message: 'You are not authorized for this operation' });
+        res.status(401).send({ message: 'You are not authorized for this operation' });
         return false;
     }
     return true;
+}
+
+export function logQuery(query: string, values?: any) {
+    const queryColor: string = '\x1b[32m%s\x1b[0m';
+    console.log(queryColor, `${query}`);
+    if (values) {
+        console.log(`Values: [ ${values} ]`);
+    }
 }

@@ -1,5 +1,6 @@
 import User from "../models/User";
 import db from "../util/pg-connection";
+import { logQuery } from "../util/utils";
 
 const bcrypt = require('bcrypt');
 const saltRounds: number = 12;
@@ -8,17 +9,19 @@ const saltRounds: number = 12;
 // For now the users are pre-existing, one for each unique role
 export async function createUser(user: User): Promise<User> { return user; }
 
+// Get all users
 export async function getAllUsers(): Promise<User[]> {
     let query = `SELECT ${User.getColumns()} FROM users ORDER BY id`;
-    console.log(query);
+    logQuery(query);
 
     const result = await db.query(query);
     return result.rows;
 }
 
+// Get user by ID
 export async function getUserById(id: number): Promise<User> {
     let query = `SELECT ${User.getColumns()} FROM users WHERE id = $1`;
-    console.log(`${query}\nValues: [ ${id} ]`);
+    logQuery(query, id);
 
     const result = await db.query(query, [id]);
     return result.rows[0];
@@ -56,7 +59,7 @@ export async function updateUser(user: User): Promise<User> {
     values.push(id);
 
     let query = `UPDATE users SET ${columns} WHERE id = $${count} RETURNING ${User.getColumns()}`;
-    console.log(`${query}\nValues: [ ${values} ]`);
+    logQuery(query, values);
 
     const result = await db.query(query, values);
     return result.rows[0];

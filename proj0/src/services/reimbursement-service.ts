@@ -1,10 +1,11 @@
 import Reimbursement from "../models/Reimbursement";
 import db from "../util/pg-connection";
+import { logQuery } from "../util/utils";
 
 // Get by reimbursement ID
 export async function getReimbursementById(id: number): Promise<Reimbursement> {
     let query = `SELECT ${Reimbursement.getColumns()} FROM reimbursements WHERE id = $1`;
-    console.log(`${query}\nValues: [ ${id} ]`);
+    logQuery(query, id);
 
     const result = await db.query(query, [id]);
     return result.rows[0];
@@ -13,7 +14,7 @@ export async function getReimbursementById(id: number): Promise<Reimbursement> {
 // Get by reimbursement status ID
 export async function getReimbursementByStatus(id: number): Promise<Reimbursement[]> {
     let query = `SELECT ${Reimbursement.getColumns()} FROM reimbursements WHERE status = $1 ORDER BY date_submitted ASC`;
-    console.log(`${query}\nValues: [ ${id} ]`);
+    logQuery(query, id);
 
     const result = await db.query(query, [id]);
     return result.rows;
@@ -22,7 +23,7 @@ export async function getReimbursementByStatus(id: number): Promise<Reimbursemen
 // Get by reimbursement user ID
 export async function getReimbursementByUser(id: number): Promise<Reimbursement[]> {
     let query = `SELECT ${Reimbursement.getColumns()} FROM reimbursements WHERE author = $1 ORDER BY date_submitted ASC`;
-    console.log(`${query}\nValues: [ ${id} ]`);
+    logQuery(query, id);
 
     const result = await db.query(query, [id]);
     return result.rows;
@@ -32,10 +33,8 @@ export async function getReimbursementByUser(id: number): Promise<Reimbursement[
 export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbursement> {
     let id: number = rmbmnt.id;
 
-    // Remove properties that may never be updated
-    delete rmbmnt.id;
-    delete rmbmnt.dateSubmitted;
-    delete rmbmnt.dateResolved;
+    // Remove properties that should never be updated
+    delete rmbmnt.id; delete rmbmnt.dateSubmitted;
     // delete rmbmnt.resolver; not sure if resolver to be set programmatically
     // delete rmbmnt.author; this too
 
@@ -55,7 +54,7 @@ export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbu
     values.push(id);
 
     let query = `UPDATE reimbursements SET ${columns} WHERE id = $${count} RETURNING ${Reimbursement.getColumns()}`;
-    console.log(`${query}\nValues: [ ${values} ]`);
+    logQuery(query, values);
 
     const result = await db.query(query, values);
     return result.rows[0];
@@ -64,10 +63,11 @@ export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbu
 // Submit reimbursement
 export async function submitReimbursement(rmbmnt: Reimbursement, id: number): Promise<Reimbursement> {
     // Remove properties that are auto-generated
-    delete rmbmnt.id; delete rmbmnt.author; delete rmbmnt.dateSubmitted;
+    delete rmbmnt.id;
     delete rmbmnt.dateResolved;
     rmbmnt.author = id;
     rmbmnt.dateSubmitted = Date.now();
+    rmbmnt.status = 1;
 
     // Gather all properties and values 
     // into a SQL query. Fun
@@ -92,9 +92,8 @@ export async function submitReimbursement(rmbmnt: Reimbursement, id: number): Pr
     columns = columns.slice(0, -2);
     placeHolders = placeHolders.slice(0, -2);
 
-    // Jesus that took a while
     let query = `INSERT INTO reimbursements (${columns}) VALUES (${placeHolders}) RETURNING ${Reimbursement.getColumns()}`;
-    console.log(`${query}\nValues: [ ${values} ]`);
+    logQuery(query, values);
 
     const result = await db.query(query, values);
     return result.rows[0];

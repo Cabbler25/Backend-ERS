@@ -7,64 +7,66 @@ import { roles } from '../models/Role';
 const reimbursementRouter = express.Router();
 
 // Gets reimbursement by user ID
-reimbursementRouter.get('/author/userId/:userId', async (request: Request, response: Response) => {
+reimbursementRouter.get('/author/userId/:userId', async (req: Request, res: Response) => {
     console.log('\nReimbursement Router: Handling get reimbursement by user...');
-    const id = parseInt(request.params.userId);
-    if (!hasPermission(request, response, roles.FINANCE_MANAGER, id)) return;
+    const id = parseInt(req.params.userId);
+    if (!hasPermission(req, res, roles.FINANCE_MANAGER, id)) return;
 
-    const rmbmnt: Reimbursement[] = await reimbursementService.getReimbursementByUser(id);
+    const rmbmnt = await reimbursementService.getReimbursementByUser(id);
     if (rmbmnt && rmbmnt.length > 0) {
-        response.status(200).json(rmbmnt);
+        res.status(200).json(rmbmnt);
     } else {
-        response.sendStatus(404);
+        res.sendStatus(404);
     }
 });
 
 // Gets reimbursement by status ID
-reimbursementRouter.get('/status/:statusId', async (request: Request, response: Response) => {
+reimbursementRouter.get('/status/:statusId', async (req: Request, res: Response) => {
     console.log('\nReimbursement Router: Handling get reimbursement by status...');
-    const id = parseInt(request.params.statusId);
-    if (!hasPermission(request, response, roles.FINANCE_MANAGER)) return;
+    const id = parseInt(req.params.statusId);
+    if (!hasPermission(req, res, roles.FINANCE_MANAGER)) return;
 
-    const rmbmnt: Reimbursement[] = await reimbursementService.getReimbursementByStatus(id);
+    const rmbmnt = await reimbursementService.getReimbursementByStatus(id);
     if (rmbmnt && rmbmnt.length > 0) {
-        response.status(200).json(rmbmnt);
+        res.status(200).json(rmbmnt);
     } else {
-        response.sendStatus(404);
+        res.sendStatus(404);
     }
 });
 
 // Update reimbursement
-reimbursementRouter.patch('', async (request: Request, response: Response) => {
+reimbursementRouter.patch('', async (req: Request, res: Response) => {
     console.log('\nReimbursement Router: Handling reimbursement patch...');
-    if (!hasPermission(request, response, roles.FINANCE_MANAGER)) return;
+    if (!hasPermission(req, res, roles.FINANCE_MANAGER)) return;
 
-    let err: string = 'Reimbursement not found';
+    const err = 'Reimbursement not found';
     try {
-        const rmbmnt: Reimbursement = new Reimbursement(request.body[0]);
+        const rmbmnt = new Reimbursement(req.body[0]);
         if (!rmbmnt) throw err;
 
-        const patchedRmbmnt: Reimbursement = await reimbursementService.updateReimbursement(rmbmnt);
-        patchedRmbmnt ? response.status(201).json(patchedRmbmnt) : response.sendStatus(404);
+        const patchedRmbmnt = await reimbursementService.updateReimbursement(rmbmnt);
+        if (!patchedRmbmnt) throw err;
+        res.status(201).json(patchedRmbmnt);
     } catch (err) {
-        response.sendStatus(400);
+        res.sendStatus(400);
     }
 });
 
 // Submit reimbursement
-reimbursementRouter.post('', async (request: Request, response: Response) => {
+reimbursementRouter.post('', async (req: Request, res: Response) => {
     console.log('\nReimbursement Router: Handling reimbursement submit...');
-    if (!hasPermission(request, response, roles.ALL)) return;
+    if (!hasPermission(req, res, roles.ALL)) return;
 
-    let err: string = 'Reimbursement not valid';
+    const err = 'Reimbursement not valid';
     try {
-        const rmbmnt: Reimbursement = new Reimbursement(request.body[0]);
+        const rmbmnt = new Reimbursement(req.body[0]);
         if (!rmbmnt) throw err;
 
-        const completedRmbmnt: Reimbursement = await reimbursementService.submitReimbursement(rmbmnt, request.cookies.user.id);
-        completedRmbmnt ? response.status(200).json(completedRmbmnt) : response.sendStatus(400);
+        const completedRmbmnt = await reimbursementService.submitReimbursement(rmbmnt, req.cookies.user.id);
+        if (!completedRmbmnt) throw err;
+        res.status(200).json(completedRmbmnt);
     } catch (err) {
-        response.sendStatus(400);
+        res.sendStatus(400);
     }
 });
 
