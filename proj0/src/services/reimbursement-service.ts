@@ -33,6 +33,10 @@ export async function getReimbursementByUser(id: number): Promise<Reimbursement[
 export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbursement> {
     let id: number = rmbmnt.id;
 
+    if (rmbmnt.status > 1) {
+        rmbmnt.dateResolved = Date.now();
+    }
+
     // Remove properties that should never be updated
     delete rmbmnt.id; delete rmbmnt.dateSubmitted;
     // delete rmbmnt.resolver; not sure if resolver to be set programmatically
@@ -47,7 +51,12 @@ export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbu
         // Exclude undefined/null properties
         if (rmbmnt[a] === undefined || rmbmnt[a] === null) continue;
 
-        columns += `${a} = $${count++}, `;
+        if (a == 'dateResolved') {
+            columns += `date_resolved = $${count++}, `;
+        } else {
+            columns += `${a} = $${count++}, `;
+        }
+
         values.push(rmbmnt[a]);
     }
     columns = columns.slice(0, -2);
