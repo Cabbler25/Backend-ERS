@@ -21,7 +21,6 @@ export function hasPermission(req, res, requiredRole, requiredId?): boolean {
 
     const userId = req.cookies.user.id;
     const userRole = req.cookies.permissions.id;
-    console.log(req.cookies.permissions);
 
     let result;
     if (userId) result = userId == requiredId;
