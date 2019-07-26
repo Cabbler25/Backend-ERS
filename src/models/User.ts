@@ -6,7 +6,7 @@ export default class User {
     lastName: string;
     email: string;
     role: number;
-    
+
     constructor(obj) {
         if (!obj) return;
         this.id = obj.id;
@@ -18,7 +18,11 @@ export default class User {
         this.role = obj.role;
     }
 
-    static getColumns(): string {
+    static getAllColumns(): string {
         return 'id, username, password, first_name "firstName", last_name "lastName", email, role';
+    }
+
+    static getColumnsNoPassword(): string {
+        return 'id, username, first_name "firstName", last_name "lastName", email, role';
     }
 }

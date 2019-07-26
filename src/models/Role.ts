@@ -1,7 +1,7 @@
 export const roles = {
     ADMIN: 'admin',
     FINANCE_MANAGER: 'finance-manager',
-    EMPLOYEE: 'employee',
+    USER: 'user',
     ALL: 'all'
 }
 
@@ -16,5 +16,12 @@ export default class Role {
 
     static getColumns(): string {
         return 'id, role';
+    }
+
+    static hasPermission(id, requiredId) {
+        if (id <= requiredId) {
+            return true;
+        }
+        return false;
     }
 }

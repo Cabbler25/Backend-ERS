@@ -4,7 +4,7 @@ import Role from "../models/Role";
 import { logQuery } from "../util/utils";
 
 export async function logIn(username: string): Promise<User> {
-    let query = `SELECT ${User.getColumns()} FROM users WHERE username = $1`;
+    let query = `SELECT ${User.getAllColumns()} FROM users WHERE username = $1`;
     logQuery(query, username);
 
     const result = await db.query(query, [username]);

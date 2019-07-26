@@ -36,7 +36,7 @@ userRouter.patch('', async (req: Request, res: Response) => {
 
     const err = 'User not found';
     try {
-        const user = new User(req.body[0]);
+        const user = new User(req.body);
         if (!user) throw err;
 
         const patchedUser = await userService.updateUser(user);

@@ -13,9 +13,13 @@ types.setTypeParser(1700, function (val) {
 
 // Set middleware
 const cookieParser = require('cookie-parser');
+const cors = require("cors");
 const app = express();
-const port = 3333;
+const port = 3001;
+
 app.use(cookieParser());
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/users', userRouter);
 app.use('/login', loginRouter);

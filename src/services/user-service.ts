@@ -2,7 +2,7 @@ import User from "../models/User";
 import db from "../util/pg-connection";
 import { logQuery } from "../util/utils";
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds: number = 12;
 
 // TODO: implement
@@ -11,7 +11,7 @@ export async function createUser(user: User): Promise<User> { return user; }
 
 // Get all users
 export async function getAllUsers(): Promise<User[]> {
-    let query = `SELECT ${User.getColumns()} FROM users ORDER BY id`;
+    let query = `SELECT ${User.getColumnsNoPassword()} FROM users ORDER BY id`;
     logQuery(query);
 
     const result = await db.query(query);
@@ -20,7 +20,7 @@ export async function getAllUsers(): Promise<User[]> {
 
 // Get user by ID
 export async function getUserById(id: number): Promise<User> {
-    let query = `SELECT ${User.getColumns()} FROM users WHERE id = $1`;
+    let query = `SELECT ${User.getAllColumns()} FROM users WHERE id = $1`;
     logQuery(query, id);
 
     const result = await db.query(query, [id]);
@@ -58,7 +58,7 @@ export async function updateUser(user: User): Promise<User> {
     columns = columns.slice(0, -2);
     values.push(id);
 
-    let query = `UPDATE users SET ${columns} WHERE id = $${count} RETURNING ${User.getColumns()}`;
+    let query = `UPDATE users SET ${columns} WHERE id = $${count} RETURNING ${User.getColumnsNoPassword()}`;
     logQuery(query, values);
 
     const result = await db.query(query, values);
