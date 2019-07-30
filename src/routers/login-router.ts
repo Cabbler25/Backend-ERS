@@ -29,8 +29,8 @@ loginRouter.post('', async (req: Request, res: Response) => {
 
         // Assign cookies and return logged in user
         delete user.password;
-        res.cookie('user', user, { maxAge: timeout });
-        res.cookie('permissions', role, { maxAge: timeout });
+        res.cookie('user', user);
+        res.cookie('permissions', role);
         res.status(200).json(user);
     } catch (err) {
         res.status(400).json(err);

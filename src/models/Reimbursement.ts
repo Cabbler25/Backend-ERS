@@ -2,8 +2,8 @@ export default class Reimbursement {
     id: number;
     author: number;
     amount: number;
-    dateSubmitted: number;
-    dateResolved: number;
+    dateSubmitted: Date;
+    dateResolved: Date;
     description: string;
     resolver: number;
     status: number;
@@ -22,6 +22,6 @@ export default class Reimbursement {
     }
 
     static getColumns(): string {
-        return 'id, author, amount, date_submitted "dateSubmitted", date_resolved "dateResolved", description, resolver, status, type';
+        return `id, author, amount, TO_CHAR(date_submitted :: DATE, 'mm/dd/yyyy') "dateSubmitted", TO_CHAR(date_resolved :: DATE, 'mm/dd/yyyy') "dateResolved", description, resolver, status, type`;
     }
 }

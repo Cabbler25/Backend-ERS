@@ -41,10 +41,10 @@ reimbursementRouter.patch('', async (req: Request, res: Response) => {
 
     const err = 'Reimbursement not found';
     try {
-        const rmbmnt = new Reimbursement(req.body[0]);
+        const rmbmnt = new Reimbursement(req.body);
         if (!rmbmnt) throw err;
 
-        const patchedRmbmnt = await reimbursementService.updateReimbursement(rmbmnt);
+        const patchedRmbmnt = await reimbursementService.updateReimbursement(rmbmnt, req.cookies.user.id);
         if (!patchedRmbmnt) throw err;
         res.status(201).json(patchedRmbmnt);
     } catch (err) {
@@ -59,7 +59,7 @@ reimbursementRouter.post('', async (req: Request, res: Response) => {
 
     const err = 'Reimbursement not valid';
     try {
-        const rmbmnt = new Reimbursement(req.body[0]);
+        const rmbmnt = new Reimbursement(req.body);
         if (!rmbmnt) throw err;
 
         const completedRmbmnt = await reimbursementService.submitReimbursement(rmbmnt, req.cookies.user.id);

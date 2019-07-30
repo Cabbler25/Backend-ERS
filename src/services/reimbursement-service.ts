@@ -30,17 +30,22 @@ export async function getReimbursementByUser(id: number): Promise<Reimbursement[
 }
 
 // Patch reimbursement
-export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbursement> {
+export async function updateReimbursement(rmbmnt: Reimbursement, resolverId: number): Promise<Reimbursement> {
     let id: number = rmbmnt.id;
-
-    if (rmbmnt.status > 1) {
-        rmbmnt.dateResolved = Date.now();
+    if (rmbmnt.status != 1) {
+        rmbmnt.dateResolved = new Date();
+        rmbmnt.resolver = resolverId;
+    } else if (rmbmnt.dateResolved) {
+        rmbmnt.dateResolved = null;
+        rmbmnt.resolver = null;
+    } else {
+        delete rmbmnt.dateResolved;
+        delete rmbmnt.resolver;
     }
 
     // Remove properties that should never be updated
     delete rmbmnt.id; delete rmbmnt.dateSubmitted;
-    // delete rmbmnt.resolver; not sure if resolver to be set programmatically
-    // delete rmbmnt.author; this too
+    delete rmbmnt.author;
 
     // Gather all properties and values 
     // into a SQL query. Fun
@@ -49,7 +54,11 @@ export async function updateReimbursement(rmbmnt: Reimbursement): Promise<Reimbu
     let count: number = 1;
     for (let a in rmbmnt) {
         // Exclude undefined/null properties
-        if (rmbmnt[a] === undefined || rmbmnt[a] === null) continue;
+        // Allowing for those that may be null
+        if (a != 'dateResolved' && a != 'resolver') {
+            if (rmbmnt[a] === undefined || rmbmnt[a] === null) continue;
+            if (a == 'description' && rmbmnt[a] == '') continue;
+        }
 
         if (a == 'dateResolved') {
             columns += `date_resolved = $${count++}, `;
@@ -75,7 +84,7 @@ export async function submitReimbursement(rmbmnt: Reimbursement, id: number): Pr
     delete rmbmnt.id;
     delete rmbmnt.dateResolved;
     rmbmnt.author = id;
-    rmbmnt.dateSubmitted = Date.now();
+    rmbmnt.dateSubmitted = new Date();
     rmbmnt.status = 1;
 
     // Gather all properties and values 
@@ -94,7 +103,6 @@ export async function submitReimbursement(rmbmnt: Reimbursement, id: number): Pr
         }
         // Convert var names to db column names
         a == 'dateSubmitted' ? columns += `date_submitted, ` : columns += `${a}, `;
-
         placeHolders += `$${count++}, `;
         values.push(rmbmnt[a]);
     }

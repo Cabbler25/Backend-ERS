@@ -32,7 +32,9 @@ userRouter.get('/:id', async (req: Request, res: Response) => {
 // Update user
 userRouter.patch('', async (req: Request, res: Response) => {
     console.log('\nUser Router: Handling user patch...');
-    if (!hasPermission(req, res, roles.ADMIN)) return;
+    if (req.body.id) {
+        if (!hasPermission(req, res, roles.ADMIN, req.body.id)) return;
+    } else if (!hasPermission(req, res, roles.ADMIN)) return;
 
     const err = 'User not found';
     try {
